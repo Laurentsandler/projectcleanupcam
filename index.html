@@ -1,66 +1,209 @@
-<div>Teachable Machine Image Model</div>
-<button type="button" onclick="init()">Start</button>
-<div id="webcam-container"></div>
-<div id="label-container"></div>
-<div id="error-container"></div> <!-- Error message container -->
-<script src="https://cdn.jsdelivr.net/npm/@tensorflow/tfjs@latest/dist/tf.min.js"></script>
-<script src="https://cdn.jsdelivr.net/npm/@teachablemachine/image@latest/dist/teachablemachine-image.min.js"></script>
-<script type="text/javascript">
-    const URL = "https://teachablemachine.withgoogle.com/models/WH1--Ms-7/";
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Home Screen & Get Points</title>
+    <style>
+        body {
+            font-family: 'Arial', sans-serif;
+            background: linear-gradient(135deg, #f5f7fa, #c3cfe2);
+            margin: 0;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            height: 100vh;
+        }
 
-    let model, webcam, labelContainer, maxPredictions;
+        #container, #home-screen, #points-screen {
+            display: none;
+            background-color: white;
+            padding: 20px;
+            border-radius: 10px;
+            text-align: center;
+            width: 90%;
+            max-width: 600px;
+        }
 
-    // Load the image model and setup the webcam
-    async function init() {
-        const modelURL = URL + "model.json";
-        const metadataURL = URL + "metadata.json";
+        button {
+            padding: 10px 20px;
+            border-radius: 12px;
+            border: none;
+            background-color: #4CAF50;
+            color: white;
+            cursor: pointer;
+            width: 100%;
+            margin-top: 10px;
+        }
 
-        try {
-            // Load the model and metadata
-            model = await tmImage.load(modelURL, metadataURL);
-            maxPredictions = model.getTotalClasses();
+        button:hover {
+            background-color: #45a049;
+        }
 
-            // Set up the back-facing camera
-            const flip = false; // Do not flip the webcam for the back camera
-            webcam = new tmImage.Webcam(640, 480, flip); // Use a standard resolution
+        .hidden {
+            display: none;
+        }
 
-            // Add video constraints to access the back camera
-            const constraints = {
-                video: {
-                    facingMode: { exact: "environment" } // Request the back camera
-                }
-            };
+        /* Style for Teachable Machine Screen */
+        #webcam-container, #label-container, #error-container {
+            margin-top: 20px;
+        }
+    </style>
+</head>
+<body>
 
-            // Try to set up the webcam with the constraints
-            await webcam.setup({ facingMode: "environment" }); // Request back-facing camera
-            await webcam.play();
-            window.requestAnimationFrame(loop);
+    <!-- Sign-In / Sign-Up Screen -->
+    <div id="container">
+        <h2>Enter your PIN</h2>
+        <p>Enter your PIN:</p>
+        <div id="pin-buttons"></div>
+        <p id="login-message"></p>
+    </div>
 
-            // Append elements to the DOM
-            document.getElementById("webcam-container").appendChild(webcam.canvas);
-            labelContainer = document.getElementById("label-container");
-            for (let i = 0; i < maxPredictions; i++) {
-                labelContainer.appendChild(document.createElement("div"));
+    <!-- Home Screen -->
+    <div id="home-screen">
+        <h2>Welcome!</h2>
+        <p>Points: <span id="points-display">0</span></p>
+        <button id="get-points-btn">Get Points</button>
+    </div>
+
+    <!-- Get Points Screen (Teachable Machine) -->
+    <div id="points-screen">
+        <h2>Teachable Machine Image Model</h2>
+        <button type="button" onclick="init()">Start</button>
+        <div id="webcam-container"></div>
+        <div id="label-container"></div>
+        <div id="error-container"></div>
+    </div>
+
+    <script src="https://cdn.jsdelivr.net/npm/@tensorflow/tfjs@latest/dist/tf.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/@teachablemachine/image@latest/dist/teachablemachine-image.min.js"></script>
+    <script>
+        let enteredPin = '';
+        let currentUserId = '';
+        let userPoints = 0;
+
+        // Catalog data (simplified)
+        const catalog = [
+            { name: "Item 1", price: 10 },
+            { name: "Item 2", price: 20 }
+        ];
+
+        // Handle PIN entry
+        createPinButtons();
+        function createPinButtons() {
+            const pinButtons = document.getElementById('pin-buttons');
+            for (let i = 0; i <= 9; i++) {
+                const button = document.createElement('button');
+                button.innerText = i;
+                button.onclick = () => enterPin(i);
+                pinButtons.appendChild(button);
             }
-        } catch (err) {
-            // Display error message
-            document.getElementById("error-container").innerHTML = "Error: Could not access the camera. Please check your permissions and ensure the camera is not in use by another application.";
-            console.error("Error accessing the webcam: ", err);
         }
-    }
 
-    async function loop() {
-        webcam.update(); // Update the webcam frame
-        await predict();
-        window.requestAnimationFrame(loop);
-    }
-
-    async function predict() {
-        const prediction = await model.predict(webcam.canvas);
-        for (let i = 0; i < maxPredictions; i++) {
-            const classPrediction =
-                prediction[i].className + ": " + prediction[i].probability.toFixed(2);
-            labelContainer.childNodes[i].innerHTML = classPrediction;
+        function enterPin(number) {
+            enteredPin += number;
+            if (enteredPin.length === 4) {
+                signIn();
+            }
         }
-    }
-</script>
+
+        // Simulate sign-in (replace with real API)
+        async function signIn() {
+            if (enteredPin === '1234') {
+                currentUserId = 'demoUserId';
+                userPoints = 5; // Example starting points
+                document.getElementById('points-display').textContent = userPoints;
+                showHomeScreen();
+            } else {
+                document.getElementById('login-message').textContent = 'Incorrect PIN. Try again.';
+                enteredPin = '';
+            }
+        }
+
+        // Show home screen after login
+        function showHomeScreen() {
+            document.getElementById('container').style.display = 'none';
+            document.getElementById('home-screen').style.display = 'block';
+        }
+
+        // Handle "Get Points" button click
+        document.getElementById('get-points-btn').addEventListener('click', () => {
+            document.getElementById('home-screen').style.display = 'none';
+            document.getElementById('points-screen').style.display = 'block';
+        });
+
+        // Teachable Machine Model Setup
+        const URL = "https://teachablemachine.withgoogle.com/models/WH1--Ms-7/";
+        let model, webcam, labelContainer, maxPredictions;
+
+        // Load the image model and setup the webcam
+        async function init() {
+            const modelURL = URL + "model.json";
+            const metadataURL = URL + "metadata.json";
+
+            try {
+                // Load the model and metadata
+                model = await tmImage.load(modelURL, metadataURL);
+                maxPredictions = model.getTotalClasses();
+
+                // Set up the back-facing camera
+                const flip = false;
+                webcam = new tmImage.Webcam(640, 480, flip);
+                await webcam.setup({ facingMode: "environment" });
+                await webcam.play();
+                window.requestAnimationFrame(loop);
+
+                // Append webcam to DOM
+                document.getElementById("webcam-container").appendChild(webcam.canvas);
+                labelContainer = document.getElementById("label-container");
+                for (let i = 0; i < maxPredictions; i++) {
+                    labelContainer.appendChild(document.createElement("div"));
+                }
+            } catch (err) {
+                document.getElementById("error-container").innerHTML = "Error: Could not access the camera.";
+                console.error("Error accessing the webcam: ", err);
+            }
+        }
+
+        // Prediction loop
+        async function loop() {
+            webcam.update();
+            await predict();
+            window.requestAnimationFrame(loop);
+        }
+
+        // Prediction and checking class one duration
+        let classOneDuration = 0;
+        const classOneThreshold = 10; // 10 seconds for reward
+
+        async function predict() {
+            const prediction = await model.predict(webcam.canvas);
+            for (let i = 0; i < maxPredictions; i++) {
+                const classPrediction = prediction[i].className + ": " + prediction[i].probability.toFixed(2);
+                labelContainer.childNodes[i].innerHTML = classPrediction;
+
+                if (prediction[i].className === "class one" && prediction[i].probability > 0.9) {
+                    classOneDuration++;
+                    if (classOneDuration >= classOneThreshold) {
+                        givePoints(1); // Give 1 point for holding class one for 10 seconds
+                        classOneDuration = 0; // Reset duration
+                    }
+                } else {
+                    classOneDuration = 0; // Reset duration if class one is not detected
+                }
+            }
+        }
+
+        // Update points in the database (simulate here)
+        async function givePoints(points) {
+            userPoints += points;
+            document.getElementById('points-display').textContent = userPoints;
+
+            alert(`You earned ${points} points!`);
+            // Add real API call here to update user points in the database.
+        }
+    </script>
+</body>
+</html>
