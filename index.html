@@ -1,66 +1,299 @@
-<div>Teachable Machine Image Model</div>
-<button type="button" onclick="init()">Start</button>
-<div id="webcam-container"></div>
-<div id="label-container"></div>
-<div id="error-container"></div> <!-- Error message container -->
-<script src="https://cdn.jsdelivr.net/npm/@tensorflow/tfjs@latest/dist/tf.min.js"></script>
-<script src="https://cdn.jsdelivr.net/npm/@teachablemachine/image@latest/dist/teachablemachine-image.min.js"></script>
-<script type="text/javascript">
-    const URL = "https://teachablemachine.withgoogle.com/models/WH1--Ms-7/";
+<!DOCTYPE html>
+<html lang="en">
 
-    let model, webcam, labelContainer, maxPredictions;
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>User Authentication and Points</title>
+    <style>
+        body {
+            font-family: 'Arial', sans-serif;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            height: 100vh;
+            background: linear-gradient(135deg, #f5f7fa, #c3cfe2);
+            margin: 0;
+        }
 
-    // Load the image model and setup the webcam
-    async function init() {
-        const modelURL = URL + "model.json";
-        const metadataURL = URL + "metadata.json";
+        #container {
+            background-color: linear-gradient(135deg, #f5f7fa, #c3cfe2);
+            padding: 20px;
+            border-radius: 10px;
+            text-align: center;
+            width: 300px;
+        }
 
-        try {
-            // Load the model and metadata
-            model = await tmImage.load(modelURL, metadataURL);
-            maxPredictions = model.getTotalClasses();
+        input {
+            width: 100%;
+            padding: 10px;
+            margin: 10px 0;
+            border-radius: 5px;
+            border: 1px solid #ccc;
+        }
 
-            // Set up the back-facing camera
-            const flip = false; // Do not flip the webcam for the back camera
-            webcam = new tmImage.Webcam(640, 480, flip); // Use a standard resolution
+        button {
+            padding: 10px 20px;
+            border-radius: 12px;
+            border: none;
+            background-color: #4CAF50;
+            color: white;
+            cursor: pointer;
+            margin: 5px;
+        }
 
-            // Add video constraints to access the back camera
-            const constraints = {
-                video: {
-                    facingMode: { exact: "environment" } // Request the back camera
-                }
+        button:hover {
+            background-color: #45a049;
+        }
+
+        .hidden {
+            display: none;
+        }
+
+        .number-button {
+            width: 60px;
+            height: 60px;
+            font-size: 24px;
+            margin: 10px;
+            border-radius: 15px;
+            background-color: #f1f1f1;
+            border: 1px solid #ccc;
+        }
+
+        .number-button:hover {
+            background-color: #e0e0e0;
+        }
+    </style>
+</head>
+
+<body>
+    <div id="container">
+        <div id="signup-container">
+            <h2>Sign Up</h2>
+            <input type="text" id="name" placeholder="Enter your name" required>
+            <button onclick="signUp()">Sign Up</button>
+            <p id="message"></p>
+        </div>
+
+        <div id="login-container" class="hidden">
+            <h2>Enter your pin here</h2>
+            <p>Enter your PIN:</p>
+            <div id="pin-buttons"></div>
+            <button onclick="signIn()">Sign In</button>
+            <p id="login-message"></p>
+        </div>
+
+        <div id="welcome-container" class="hidden">
+            <h2>Welcome!</h2>
+            <p id="user-details"></p>
+            <button onclick="showPointsScreen()">Get Points</button>
+        </div>
+
+        <div id="points-container" class="hidden">
+            <div>Teachable Machine Image Model</div>
+            <button type="button" onclick="init()">Start</button>
+            <div id="webcam-container"></div>
+            <div id="label-container"></div>
+            <div id="error-container"></div> <!-- Error message container -->
+        </div>
+    </div>
+
+    <script src="https://cdn.jsdelivr.net/npm/@tensorflow/tfjs@latest/dist/tf.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/@teachablemachine/image@latest/dist/teachablemachine-image.min.js"></script>
+    <script type="text/javascript">
+        let enteredPin = '';
+        let currentUserId = '';
+        let auraPoints = 0;
+        let class1Counter = 0; // Counter for class 1 detections
+        const URL = "https://teachablemachine.withgoogle.com/models/WH1--Ms-7/";
+        let model, webcam, labelContainer, maxPredictions;
+
+        // Check if user data exists in local storage
+        if (localStorage.getItem('name') && localStorage.getItem('pin')) {
+            document.getElementById('signup-container').classList.add('hidden');
+            document.getElementById('login-container').classList.remove('hidden');
+            createPinButtons();
+        }
+
+        function createPinButtons() {
+            const pinButtons = document.getElementById('pin-buttons');
+            for (let i = 0; i <= 9; i++) {
+                const button = document.createElement('button');
+                button.innerText = i;
+                button.classList.add('number-button');
+                button.onclick = () => enterPin(i);
+                pinButtons.appendChild(button);
+            }
+        }
+
+        function enterPin(number) {
+            enteredPin += number;
+            if (enteredPin.length === 4) {
+                signIn();
+            }
+        }
+
+        async function signUp() {
+            const name = document.getElementById('name').value;
+            if (!name) {
+                document.getElementById('message').textContent = "Please enter your name.";
+                return;
+            }
+
+            const pin = Math.floor(1000 + Math.random() * 9000);
+            const auraPoints = 0;
+
+            const data = {
+                name: name,
+                pin: pin,
+                auraPoints: auraPoints
             };
 
-            // Try to set up the webcam with the constraints
-            await webcam.setup({ facingMode: "environment" }); // Request back-facing camera
-            await webcam.play();
-            window.requestAnimationFrame(loop);
+            try {
+                const response = await fetch('https://projectcleanup-74b3.restdb.io/rest/userdata', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                        'x-apikey': '66f1a6d903bb68c0d791b216'
+                    },
+                    body: JSON.stringify(data)
+                });
 
-            // Append elements to the DOM
-            document.getElementById("webcam-container").appendChild(webcam.canvas);
-            labelContainer = document.getElementById("label-container");
-            for (let i = 0; i < maxPredictions; i++) {
-                labelContainer.appendChild(document.createElement("div"));
+                const result = await response.json();
+
+                if (response.ok) {
+                    localStorage.setItem('name', name);
+                    localStorage.setItem('pin', pin);
+                    localStorage.setItem('auraPoints', auraPoints);
+                    currentUserId = result._id; // Store user ID for future updates
+                    showWelcomeScreen();
+                } else {
+                    document.getElementById('message').textContent = `Error: ${result.message}`;
+                }
+
+            } catch (error) {
+                console.error('Error:', error);
+                document.getElementById('message').textContent = `Error: ${error.message}`;
             }
-        } catch (err) {
-            // Display error message
-            document.getElementById("error-container").innerHTML = "Error: Could not access the camera. Please check your permissions and ensure the camera is not in use by another application.";
-            console.error("Error accessing the webcam: ", err);
         }
-    }
 
-    async function loop() {
-        webcam.update(); // Update the webcam frame
-        await predict();
-        window.requestAnimationFrame(loop);
-    }
+        async function signIn() {
+            if (enteredPin.length === 4) {
+                try {
+                    const response = await fetch(`https://projectcleanup-74b3.restdb.io/rest/userdata?q={"pin":${enteredPin}}`, {
+                        method: 'GET',
+                        headers: {
+                            'x-apikey': '66f1a6d903bb68c0d791b216'
+                        }
+                    });
 
-    async function predict() {
-        const prediction = await model.predict(webcam.canvas);
-        for (let i = 0; i < maxPredictions; i++) {
-            const classPrediction =
-                prediction[i].className + ": " + prediction[i].probability.toFixed(2);
-            labelContainer.childNodes[i].innerHTML = classPrediction;
+                    const users = await response.json();
+
+                    if (response.ok && users.length > 0) {
+                        const user = users[0];
+                        currentUserId = user._id; // Store user ID for updates
+                        auraPoints = user.auraPoints;
+                        showWelcomeScreen(user);
+                    } else {
+                        document.getElementById('login-message').textContent = "Incorrect PIN. Try again.";
+                        enteredPin = ''; // Reset entered PIN
+                    }
+                } catch (error) {
+                    console.error('Error:', error);
+                    document.getElementById('login-message').textContent = `Error: ${error.message}`;
+                    enteredPin = ''; // Reset entered PIN
+                }
+            }
         }
-    }
-</script>
+
+        function showWelcomeScreen(user = {}) {
+            document.getElementById('login-container').classList.add('hidden');
+            document.getElementById('signup-container').classList.add('hidden');
+            document.getElementById('welcome-container').classList.remove('hidden');
+            document.getElementById('user-details').textContent = `Welcome back, ${user.name || localStorage.getItem('name')}! Aura Points: ${auraPoints}`;
+        }
+
+        function showPointsScreen() {
+            document.getElementById('welcome-container').classList.add('hidden');
+            document.getElementById('points-container').classList.remove('hidden');
+        }
+
+        async function init() {
+            const modelURL = URL + "model.json";
+            const metadataURL = URL + "metadata.json";
+
+            try {
+                model = await tmImage.load(modelURL, metadataURL);
+                maxPredictions = model.getTotalClasses();
+                const flip = false;
+                webcam = new tmImage.Webcam(640, 480, flip);
+                await webcam.setup({ facingMode: "environment" });
+                await webcam.play();
+                window.requestAnimationFrame(loop);
+
+                document.getElementById("webcam-container").appendChild(webcam.canvas);
+                labelContainer = document.getElementById("label-container");
+                for (let i = 0; i < maxPredictions; i++) {
+                    labelContainer.appendChild(document.createElement("div"));
+                }
+            } catch (err) {
+                document.getElementById("error-container").innerHTML = "Error: Could not access the camera. Please check your permissions and ensure the camera is not in use by another application.";
+                console.error("Error accessing the webcam: ", err);
+            }
+        }
+
+        async function loop() {
+            webcam.update();
+            await predict();
+            window.requestAnimationFrame(loop);
+        }
+
+        async function predict() {
+            const prediction = await model.predict(webcam.canvas);
+            for (let i = 0; i < maxPredictions; i++) {
+                const classPrediction = `${prediction[i].className}: ${prediction[i].probability.toFixed(2)}`;
+                labelContainer.childNodes[i].innerHTML = classPrediction;
+            }
+
+            if (prediction[0].probability > 0.95) {
+                class1Counter++;
+                if (class1Counter >= 150) {
+                    updateAuraPoints(1);
+                    class1Counter = 0;
+                }
+            } else {
+                class1Counter = 0;
+            }
+        }
+
+        async function updateAuraPoints(points) {
+            auraPoints += points;
+            localStorage.setItem('auraPoints', auraPoints);
+
+            const data = {
+                auraPoints: auraPoints
+            };
+
+            try {
+                const response = await fetch(`https://projectcleanup-74b3.restdb.io/rest/userdata/${currentUserId}`, {
+                    method: 'PATCH',
+                    headers: {
+                        'Content-Type': 'application/json',
+                        'x-apikey': '66f1a6d903bb68c0d791b216'
+                    },
+                    body: JSON.stringify(data)
+                });
+
+                if (response.ok) {
+                    document.getElementById('user-details').textContent = `Welcome back, ${localStorage.getItem('name')}! Aura Points: ${auraPoints}`;
+                } else {
+                    console.error('Error updating aura points:', response.statusText);
+                }
+            } catch (error) {
+                console.error('Error:', error);
+            }
+        }
+    </script>
+</body>
+
+</html>
