@@ -91,7 +91,7 @@
 
         <div id="points-container" class="hidden">
             <div>Teachable Machine Image Model</div>
-            <button type="button" id="startButton" onclick="init()">Start</button>
+            <button type="button" onclick="init()">Start</button>
             <div id="webcam-container"></div>
             <div id="label-container"></div>
             <div id="error-container"></div> <!-- Error message container -->
@@ -168,19 +168,19 @@
                     currentUserId = result._id; // Store user ID for future updates
                     showWelcomeScreen();
                 } else {
-                    document.getElementById('message').textContent = `Error: ${result.message}`;
+                    document.getElementById('message').textContent = Error: ${result.message};
                 }
 
             } catch (error) {
                 console.error('Error:', error);
-                document.getElementById('message').textContent = `Error: ${error.message}`;
+                document.getElementById('message').textContent = Error: ${error.message};
             }
         }
 
         async function signIn() {
             if (enteredPin.length === 4) {
                 try {
-                    const response = await fetch(`https://projectcleanup-74b3.restdb.io/rest/userdata?q={"pin":${enteredPin}}`, {
+                    const response = await fetch(https://projectcleanup-74b3.restdb.io/rest/userdata?q={"pin":${enteredPin}}, {
                         method: 'GET',
                         headers: {
                             'x-apikey': '66f1a6d903bb68c0d791b216'
@@ -200,7 +200,7 @@
                     }
                 } catch (error) {
                     console.error('Error:', error);
-                    document.getElementById('login-message').textContent = `Error: ${error.message}`;
+                    document.getElementById('login-message').textContent = Error: ${error.message};
                     enteredPin = ''; // Reset entered PIN
                 }
             }
@@ -210,7 +210,7 @@
             document.getElementById('login-container').classList.add('hidden');
             document.getElementById('signup-container').classList.add('hidden');
             document.getElementById('welcome-container').classList.remove('hidden');
-            document.getElementById('user-details').textContent = `Welcome back, ${user.name || localStorage.getItem('name')}! Aura Points: ${auraPoints}`;
+            document.getElementById('user-details').textContent = Welcome back, ${user.name || localStorage.getItem('name')}! Aura Points: ${auraPoints};
         }
 
         function showPointsScreen() {
@@ -236,10 +236,6 @@
                 for (let i = 0; i < maxPredictions; i++) {
                     labelContainer.appendChild(document.createElement("div"));
                 }
-
-                // Hide the Start button and the text
-                document.getElementById('startButton').style.display = 'none';
-
             } catch (err) {
                 document.getElementById("error-container").innerHTML = "Error: Could not access the camera. Please check your permissions and ensure the camera is not in use by another application.";
                 console.error("Error accessing the webcam: ", err);
@@ -255,23 +251,31 @@
         async function predict() {
             const prediction = await model.predict(webcam.canvas);
             for (let i = 0; i < maxPredictions; i++) {
-                const classPrediction = `${prediction[i].className}: ${prediction[i].probability.toFixed(2)}`;
+                const classPrediction = ${prediction[i].className}: ${prediction[i].probability.toFixed(2)};
                 labelContainer.childNodes[i].innerHTML = classPrediction;
-                if (prediction[i].className === 'class 1' && prediction[i].probability > 0.95) {
-                    class1Counter++;
-                    if (class1Counter >= 5) {
-                        updatePoints();
-                        class1Counter = 0;
-                    }
+            }
+
+            if (prediction[0].probability > 0.95) {
+                class1Counter++;
+                if (class1Counter >= 150) {
+                    updateAuraPoints(1);
+                    class1Counter = 0;
                 }
+            } else {
+                class1Counter = 0;
             }
         }
 
-        async function updatePoints() {
-            auraPoints += 1;
+        async function updateAuraPoints(points) {
+            auraPoints += points;
+            localStorage.setItem('auraPoints', auraPoints);
+
+            const data = {
+                auraPoints: auraPoints
+            };
+
             try {
-                const data = { auraPoints: auraPoints };
-                const response = await fetch(`https://projectcleanup-74b3.restdb.io/rest/userdata/${currentUserId}`, {
+                const response = await fetch(https://projectcleanup-74b3.restdb.io/rest/userdata/${currentUserId}, {
                     method: 'PATCH',
                     headers: {
                         'Content-Type': 'application/json',
@@ -281,9 +285,9 @@
                 });
 
                 if (response.ok) {
-                    document.getElementById('user-details').textContent = `Aura Points: ${auraPoints}`;
+                    document.getElementById('user-details').textContent = Welcome back, ${localStorage.getItem('name')}! Aura Points: ${auraPoints};
                 } else {
-                    console.error("Error updating points");
+                    console.error('Error updating aura points:', response.statusText);
                 }
             } catch (error) {
                 console.error('Error:', error);
