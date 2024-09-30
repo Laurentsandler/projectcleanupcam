@@ -90,11 +90,12 @@
         </div>
 
         <div id="points-container" class="hidden">
-          <div>To get points, during lunch find a green trash can, put your bottle into the opening in the trash can, and close the door, then put your iPad camera over the little window in the receptacle, then press start. Keep your iPad there until you get the message saying that you got 1 point. Once you get it, you may press the 'Send it' button on the trash can to throw away your plastic bottle. Note: the door will not open until you press the button. Also, you will not receive points for anything but a plastic bottle. You are allowed to get a max of 5 points per day. If you try to exceed the limit, your account will be flagged and at risk of deletion. You can exchange your points at lunch at a stand.</div>
-<button type="button" onclick="init()">Start</button>
+          <div id="instructions">To get points, during lunch find a green trash can, put your bottle into the opening in the trash can, and close the door, then put your iPad camera over the little window in the receptacle, then press start. Keep your iPad there until you get the message saying that you got 1 point. Once you get it, you may press the 'Send it' button on the trash can to throw away your plastic bottle. Note: the door will not open until you press the button. Also, you will not receive points for anything but a plastic bottle. You are allowed to get a max of 5 points per day. If you try to exceed the limit, your account will be flagged and at risk of deletion. You can exchange your points at lunch at a stand.</div>
+<button id="start-button" type="button" onclick="init()">Start</button>
 <div id="webcam-container"></div>
 <div id="label-container"></div>
 <div id="error-container"></div> <!-- Error message container -->
+
 
         </div>
     </div>
@@ -219,53 +220,85 @@
             document.getElementById('points-container').classList.remove('hidden');
         }
 
-        async function init() {
-            const modelURL = URL + "model.json";
-            const metadataURL = URL + "metadata.json";
+       async function init() {
+    // Hide the instructions and start button
+    document.getElementById("instructions").style.display = "none";
+    document.getElementById("start-button").style.display = "none";
 
-            try {
-                model = await tmImage.load(modelURL, metadataURL);
-                maxPredictions = model.getTotalClasses();
-                const flip = false;
-                webcam = new tmImage.Webcam(640, 480, flip);
-                await webcam.setup({ facingMode: "environment" });
-                await webcam.play();
-                window.requestAnimationFrame(loop);
+    const modelURL = URL + "model.json";
+    const metadataURL = URL + "metadata.json";
 
-                document.getElementById("webcam-container").appendChild(webcam.canvas);
-                labelContainer = document.getElementById("label-container");
-                for (let i = 0; i < maxPredictions; i++) {
-                    labelContainer.appendChild(document.createElement("div"));
-                }
-            } catch (err) {
-                document.getElementById("error-container").innerHTML = "Error: Could not access the camera. Please check your permissions and ensure the camera is not in use by another application.";
-                console.error("Error accessing the webcam: ", err);
-            }
+    try {
+        // Load the model and metadata
+        model = await tmImage.load(modelURL, metadataURL);
+        maxPredictions = model.getTotalClasses();
+
+        // Set up the back-facing camera
+        const flip = false; // Do not flip the webcam for the back camera
+        webcam = new tmImage.Webcam(640, 480, flip); // Use a standard resolution
+
+        // Try to set up the webcam with the constraints
+        await webcam.setup({ facingMode: "environment" }); // Request back-facing camera
+        await webcam.play();
+        window.requestAnimationFrame(loop);
+
+        // Append elements to the DOM
+        document.getElementById("webcam-container").appendChild(webcam.canvas);
+        labelContainer = document.getElementById("label-container");
+        for (let i = 0; i < maxPredictions; i++) {
+            labelContainer.appendChild(document.createElement("div"));
         }
+    } catch (err) {
+        // Display error message
+        document.getElementById("error-container").innerHTML = "Error: Could not access the camera. Please check your permissions and ensure the camera is not in use by another application.";
+        console.error("Error accessing the webcam: ", err);
+    }
+}
 
-        async function loop() {
-            webcam.update();
-            await predict();
-            window.requestAnimationFrame(loop);
+async function loop() {
+    webcam.update(); // Update the webcam frame
+    await predict();
+    window.requestAnimationFrame(loop);
+}
+
+let timeOnClassOne = 0; // Time spent on class 1
+
+async function predict() {
+    const prediction = await model.predict(webcam.canvas);
+
+    // Update predictions in the DOM
+    for (let i = 0; i < maxPredictions; i++) {
+        const classPrediction =
+            prediction[i].className + ": " + prediction[i].probability.toFixed(2);
+        labelContainer.childNodes[i].innerHTML = classPrediction;
+    }
+
+    // Check if class 1 has been detected with high probability (> 0.9) for 5 seconds
+    if (prediction[0].className === "Class 1" && prediction[0].probability > 0.9) {
+        timeOnClassOne += 1;
+        if (timeOnClassOne >= 5) { // After 5 seconds
+            await getOnePoint();
+            stopModel(); // Stop the webcam and model
+            alert("Congrats! You got 1 point.");
+            returnToWelcome(); // Return to the welcome screen
         }
+    } else {
+        timeOnClassOne = 0; // Reset the timer if class 1 is not detected
+    }
+}
 
-        async function predict() {
-            const prediction = await model.predict(webcam.canvas);
-            for (let i = 0; i < maxPredictions; i++) {
-                const classPrediction = `${prediction[i].className}: ${prediction[i].probability.toFixed(2)}`;
-                labelContainer.childNodes[i].innerHTML = classPrediction;
-            }
+function stopModel() {
+    webcam.stop(); // Stop the webcam
+    window.cancelAnimationFrame(loop); // Stop the loop for predictions
+}
 
-            if (prediction[0].probability > 0.95) {
-                class1Counter++;
-                if (class1Counter >= 150) {
-                    updateAuraPoints(1);
-                    class1Counter = 0;
-                }
-            } else {
-                class1Counter = 0;
-            }
-        }
+function returnToWelcome() {
+    document.getElementById("instructions").style.display = "block";
+    document.getElementById("start-button").style.display = "block";
+    document.getElementById("webcam-container").innerHTML = ''; // Clear the webcam container
+    document.getElementById("label-container").innerHTML = ''; // Clear the label container
+}
+
 
        async function updateAuraPoints(points) {
     auraPoints += points;
