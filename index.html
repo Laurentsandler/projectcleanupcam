@@ -90,12 +90,11 @@
         </div>
 
         <div id="points-container" class="hidden">
-            <div>To get points, during lunch find a green trash can, put your bottle into the opening in the trash can, and close the door, then put your iPad camera over the little window in the receptacle, then press start. Keep your iPad there until you get the message saying that you got 1 point. Once you get it, you may press the 'Send it' button on the trash can to throw away your plastic bottle. Note: the door will not open until you press the button. Also, you will not receive points for anything but a plastic bottle. You are allowed to get a max of 5 points per day. If you try to exceed the limit, your account will be flagged and at risk of deletion. You can exchange your points at lunch at a stand.</div>
-<button type="button" onclick="init()">Start</button>
-<div id="webcam-container"></div>
-<div id="label-container"></div>
-<div id="error-container"></div> <!-- Error message container -->
-
+            <div>Teachable Machine Image Model</div>
+            <button type="button" id="startButton" onclick="init()">Start</button>
+            <div id="webcam-container"></div>
+            <div id="label-container"></div>
+            <div id="error-container"></div> <!-- Error message container -->
         </div>
     </div>
 
@@ -237,6 +236,10 @@
                 for (let i = 0; i < maxPredictions; i++) {
                     labelContainer.appendChild(document.createElement("div"));
                 }
+
+                // Hide the Start button and the text
+                document.getElementById('startButton').style.display = 'none';
+
             } catch (err) {
                 document.getElementById("error-container").innerHTML = "Error: Could not access the camera. Please check your permissions and ensure the camera is not in use by another application.";
                 console.error("Error accessing the webcam: ", err);
@@ -254,54 +257,38 @@
             for (let i = 0; i < maxPredictions; i++) {
                 const classPrediction = `${prediction[i].className}: ${prediction[i].probability.toFixed(2)}`;
                 labelContainer.childNodes[i].innerHTML = classPrediction;
-            }
-
-            if (prediction[0].probability > 0.95) {
-                class1Counter++;
-                if (class1Counter >= 150) {
-                    updateAuraPoints(1);
-                    class1Counter = 0;
+                if (prediction[i].className === 'class 1' && prediction[i].probability > 0.95) {
+                    class1Counter++;
+                    if (class1Counter >= 5) {
+                        updatePoints();
+                        class1Counter = 0;
+                    }
                 }
-            } else {
-                class1Counter = 0;
             }
         }
 
-        async function updateAuraPoints(points) {
-    auraPoints += points;
-    localStorage.setItem('auraPoints', auraPoints);
+        async function updatePoints() {
+            auraPoints += 1;
+            try {
+                const data = { auraPoints: auraPoints };
+                const response = await fetch(`https://projectcleanup-74b3.restdb.io/rest/userdata/${currentUserId}`, {
+                    method: 'PATCH',
+                    headers: {
+                        'Content-Type': 'application/json',
+                        'x-apikey': '66f1a6d903bb68c0d791b216'
+                    },
+                    body: JSON.stringify(data)
+                });
 
-    const data = {
-        auraPoints: auraPoints
-    };
-
-    try {
-        const response = await fetch(`https://projectcleanup-74b3.restdb.io/rest/userdata/${currentUserId}`, {
-            method: 'PATCH',
-            headers: {
-                'Content-Type': 'application/json',
-                'x-apikey': '66f1a6d903bb68c0d791b216'
-            },
-            body: JSON.stringify(data)
-        });
-
-        if (response.ok) {
-            document.getElementById('user-details').textContent = `Welcome back, ${localStorage.getItem('name')}! Aura Points: ${auraPoints}`;
-            
-            // Show the congratulation message
-            alert('Congrats! You got 1 point.');
-
-            // Return to the welcome screen
-            document.getElementById('points-container').classList.add('hidden');
-            document.getElementById('welcome-container').classList.remove('hidden');
-        } else {
-            console.error('Error updating aura points:', response.statusText);
+                if (response.ok) {
+                    document.getElementById('user-details').textContent = `Aura Points: ${auraPoints}`;
+                } else {
+                    console.error("Error updating points");
+                }
+            } catch (error) {
+                console.error('Error:', error);
+            }
         }
-    } catch (error) {
-        console.error('Error:', error);
-    }
-}
-
     </script>
 </body>
 
