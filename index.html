@@ -183,6 +183,13 @@
             const modelURL = URL + "model.json";
             const metadataURL = URL + "metadata.json";
 
+           document.addEventListener("DOMContentLoaded", function () {
+    if (localStorage.getItem('name') && localStorage.getItem('pin')) {
+        document.getElementById('login-container').classList.remove('hidden');
+        createPinButtons();
+    }
+});
+
             try {
                 model = await tmImage.load(modelURL, metadataURL);
                 maxPredictions = model.getTotalClasses();
