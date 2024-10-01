@@ -20,7 +20,41 @@
 
     <title>User Authentication and Points</title>
     <style>
-      
+      #container {
+    background-color: #fff; /* Add a background for better visibility */
+    padding: 20px;
+    border-radius: 10px;
+    text-align: center;
+    width: 300px;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+}
+
+#pin-buttons {
+    display: flex;
+    flex-wrap: wrap; /* Ensures buttons wrap inside the container */
+    justify-content: center;
+    gap: 10px; /* Space between buttons */
+    margin-top: 20px;
+    width: 100%; /* Ensure the buttons container takes full width */
+}
+
+.number-button {
+    width: 60px;
+    height: 60px;
+    font-size: 24px;
+    margin: 5px;
+    border-radius: 15px;
+    background-color: #f1f1f1;
+    border: 1px solid #ccc;
+    cursor: pointer;
+}
+
+.number-button:hover {
+    background-color: #e0e0e0;
+}
+
        #pin-buttons {
     display: flex;
     flex-wrap: wrap;
