@@ -252,6 +252,8 @@
                 await webcam.setup({ facingMode: "environment" });
                 await webcam.play();
                 window.requestAnimationFrame(loop);
+               const classPrediction = `${prediction[1].className}: ${prediction[0].probability.toFixed(2)}`; // Only process class 0
+
 
                 document.getElementById("webcam-container").appendChild(webcam.canvas);
                 labelContainer = document.getElementById("label-container");
