@@ -244,27 +244,37 @@
     }
 });
 
-            try {
-                model = await tmImage.load(modelURL, metadataURL);
-                maxPredictions = model.getTotalClasses();
-                const flip = false;
-                webcam = new tmImage.Webcam(640, 480, flip);
-                await webcam.setup({ facingMode: "environment" });
-                await webcam.play();
-                window.requestAnimationFrame(loop);
-               const classPrediction = `${prediction[1].className}: ${prediction[0].probability.toFixed(2)}`; // Only process class 0
+            async function init() {
+    const modelURL = URL + "model.json";
+    const metadataURL = URL + "metadata.json";
 
+    try {
+        // Load the model and metadata
+        model = await tmImage.load(modelURL, metadataURL);
+        maxPredictions = model.getTotalClasses();
 
-                document.getElementById("webcam-container").appendChild(webcam.canvas);
-                labelContainer = document.getElementById("label-container");
-                for (let i = 0; i < maxPredictions; i++) {
-                    labelContainer.appendChild(document.createElement("div"));
-                }
-            } catch (err) {
-                document.getElementById("error-container").innerHTML = "Error: Could not access the camera. Please check your permissions and ensure the camera is not in use by another application.";
-                console.error("Error accessing the webcam: ", err);
+        // Check for camera permissions before setup
+        const stream = await navigator.mediaDevices.getUserMedia({ video: true });
+        if (stream) {
+            const flip = false;
+            webcam = new tmImage.Webcam(640, 480, flip);
+            await webcam.setup({ facingMode: "environment" });
+            await webcam.play();
+            window.requestAnimationFrame(loop);
+
+            // Append webcam canvas
+            document.getElementById("webcam-container").appendChild(webcam.canvas);
+            labelContainer = document.getElementById("label-container");
+            for (let i = 0; i < maxPredictions; i++) {
+                labelContainer.appendChild(document.createElement("div"));
             }
         }
+    } catch (err) {
+        document.getElementById("error-container").innerHTML = "Error: Could not access the camera. Please check your permissions and ensure the camera is not in use by another application.";
+        console.error("Error accessing the webcam: ", err);
+    }
+}
+
 
         async function loop() {
             webcam.update();
