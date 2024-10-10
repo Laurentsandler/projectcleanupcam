@@ -2,62 +2,44 @@
 <html lang="en">
 
 <head>
-   
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-
     <title>User Authentication and Points</title>
     <style>
-      #container {
-    background-color: #fff; /* Add a background for better visibility */
-    padding: 20px;
-    border-radius: 10px;
-    text-align: center;
-    width: 300px;
-    display: flex;
-    flex-direction: column;
-    align-items: center;
-}
+        #container {
+            background-color: #fff;
+            padding: 20px;
+            border-radius: 10px;
+            text-align: center;
+            width: 300px;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+        }
 
-#pin-buttons {
-    display: flex;
-    flex-wrap: wrap; /* Ensures buttons wrap inside the container */
-    justify-content: center;
-    gap: 5px; /* Space between buttons */
-    margin-top: 20px;
-    width: 100%; /* Ensure the buttons container takes full width */
-}
+        #pin-buttons {
+            display: flex;
+            flex-wrap: wrap;
+            justify-content: center;
+            gap: 5px;
+            margin-top: 20px;
+            width: 100%;
+        }
 
-.number-button {
-    width: 60px;
-    height: 60px;
-    font-size: 24px;
-    margin: 5px;
-    border-radius: 15px;
-    background-color: #f1f1f1;
-    border: 1px solid #ccc;
-    cursor: pointer;
-}
+        .number-button {
+            width: 60px;
+            height: 60px;
+            font-size: 24px;
+            margin: 5px;
+            border-radius: 15px;
+            background-color: #f1f1f1;
+            border: 1px solid #ccc;
+            cursor: pointer;
+        }
 
-.number-button:hover {
-    background-color: #e0e0e0;
-}
-
-       #pin-buttons {
-    display: flex;
-    flex-wrap: wrap;
-    justify-content: center;
-    visibility: visible;
-    height: auto; /* Ensure the container has enough height */
-
-}
-
-
-.number-button {
-    width: 70px;
-    height: 70px;
-    font-size: 26px;
-}
+        .number-button:hover {
+            background-color: #e0e0e0;
+        }
 
         body {
             font-family: 'Arial', sans-serif;
@@ -70,16 +52,12 @@
         }
 
         #container {
-            background-color: linear-gradient(135deg, #f5f7fa, #c3cfe2);
+            background: linear-gradient(135deg, #f5f7fa, #c3cfe2);
             padding: 20px;
             border-radius: 10px;
             text-align: center;
             width: 300px;
         }
-#container {
-    background: #f5f7fa; /* Fallback for iPads */
-    background: linear-gradient(135deg, #f5f7fa, #c3cfe2);
-}
 
         input {
             width: 100%;
@@ -106,67 +84,49 @@
         .hidden {
             display: none;
         }
-
-        .number-button {
-            width: 60px;
-            height: 60px;
-            font-size: 24px;
-            margin: 10px;
-            border-radius: 15px;
-            background-color: #f1f1f1;
-            border: 1px solid #ccc;
-        }
-
-        .number-button:hover {
-            background-color: #e0e0e0;
-        }
     </style>
 </head>
 
 <body>
-    
+
     <div id="login-container">
         <div id="container">
-        <h2>Enter your PIN</h2>
-        <p>Enter your PIN:</p>
-        
-        <!-- Pin Buttons -->
-        <div id="pin-buttons">
-            <button class="number-button" onclick="enterPin(0)">0</button>
-            <button class="number-button" onclick="enterPin(1)">1</button>
-            <button class="number-button" onclick="enterPin(2)">2</button>
-            <button class="number-button" onclick="enterPin(3)">3</button>
-            <button class="number-button" onclick="enterPin(4)">4</button>
-            <button class="number-button" onclick="enterPin(5)">5</button>
-            <button class="number-button" onclick="enterPin(6)">6</button>
-            <button class="number-button" onclick="enterPin(7)">7</button>
-            <button class="number-button" onclick="enterPin(8)">8</button>
-            <button class="number-button" onclick="enterPin(9)">9</button>
-        </div>
+            <h2>Enter your PIN</h2>
+            <p>Enter your PIN:</p>
 
+            <!-- Pin Buttons -->
+            <div id="pin-buttons">
+                <button class="number-button" onclick="enterPin(0)">0</button>
+                <button class="number-button" onclick="enterPin(1)">1</button>
+                <button class="number-button" onclick="enterPin(2)">2</button>
+                <button class="number-button" onclick="enterPin(3)">3</button>
+                <button class="number-button" onclick="enterPin(4)">4</button>
+                <button class="number-button" onclick="enterPin(5)">5</button>
+                <button class="number-button" onclick="enterPin(6)">6</button>
+                <button class="number-button" onclick="enterPin(7)">7</button>
+                <button class="number-button" onclick="enterPin(8)">8</button>
+                <button class="number-button" onclick="enterPin(9)">9</button>
+            </div>
 
-        <!-- Sign In Button -->
-        <button onclick="signIn()">Sign In</button>
-        <p id="login-message"></p>
-    </div>
-    </div>
-  
-    
-<div id="welcome-container" class="hidden">
-            <h2>Welcome!</h2>
-            <p id="user-details"></p>
-            <button onclick="showPointsScreen()">Get Points</button>
-        </div>
-
-        <div id="points-container" class="hidden">
-            <div>Teachable Machine Image Model</div>
-            <button type="button" onclick="init()">Start</button>
-            <div id="webcam-container"></div>
-            <div id="label-container"></div>
-            <div id="error-container"></div> <!-- Error message container -->
+            <!-- Sign In Button -->
+            <button onclick="signIn()">Sign In</button>
+            <p id="login-message"></p>
         </div>
     </div>
-        
+
+    <div id="welcome-container" class="hidden">
+        <h2>Welcome!</h2>
+        <p id="user-details"></p>
+        <button onclick="showPointsScreen()">Get Points</button>
+    </div>
+
+    <div id="points-container" class="hidden">
+        <div>Teachable Machine Image Model</div>
+        <button type="button" onclick="init()">Start</button>
+        <div id="webcam-container"></div>
+        <div id="label-container"></div>
+        <div id="error-container"></div> <!-- Error message container -->
+    </div>
 
     <script src="https://cdn.jsdelivr.net/npm/@tensorflow/tfjs@latest/dist/tf.min.js"></script>
     <script src="https://cdn.jsdelivr.net/npm/@teachablemachine/image@latest/dist/teachablemachine-image.min.js"></script>
@@ -174,19 +134,11 @@
         let enteredPin = '';
         let currentUserId = '';
         let auraPoints = 0;
-        let class1Counter = 0; // Counter for class 1 detections
+        let class1Counter = 0;
         const URL = "https://teachablemachine.withgoogle.com/models/JjqWjtqGf/";
         let model, webcam, labelContainer, maxPredictions;
 
-        // Check if user data exists in local storage
-        if (localStorage.getItem('name') && localStorage.getItem('pin')) {
-            document.getElementById('login-container').classList.remove('hidden');
-            createPinButtons();
-        }
-
-        //function createPinButtons() {
-           
-        function enterPin(number) {
+        async function enterPin(number) {
             enteredPin += number;
             if (enteredPin.length === 4) {
                 signIn();
@@ -207,17 +159,17 @@
 
                     if (response.ok && users.length > 0) {
                         const user = users[0];
-                        currentUserId = user._id; // Store user ID for updates
+                        currentUserId = user._id;
                         auraPoints = user.auraPoints;
                         showWelcomeScreen(user);
                     } else {
                         document.getElementById('login-message').textContent = "Incorrect PIN. Try again.";
-                        enteredPin = ''; // Reset entered PIN
+                        enteredPin = '';
                     }
                 } catch (error) {
                     console.error('Error:', error);
                     document.getElementById('login-message').textContent = `Error: ${error.message}`;
-                    enteredPin = ''; // Reset entered PIN
+                    enteredPin = '';
                 }
             }
         }
@@ -233,48 +185,52 @@
             document.getElementById('points-container').classList.remove('hidden');
         }
 
+        // Check camera permissions before initializing the webcam
+        async function checkPermissions() {
+            try {
+                const permissions = await navigator.permissions.query({ name: 'camera' });
+                console.log('Camera permissions: ', permissions.state);
+                return permissions.state === 'granted';
+            } catch (err) {
+                console.error('Error checking camera permissions: ', err);
+                return false;
+            }
+        }
+
+        // Initialize the webcam and model
         async function init() {
             const modelURL = URL + "model.json";
             const metadataURL = URL + "metadata.json";
 
-           document.addEventListener("DOMContentLoaded", function () {
-    if (localStorage.getItem('name') && localStorage.getItem('pin')) {
-        document.getElementById('login-container').classList.remove('hidden');
-        createPinButtons();
-    }
-});
+            const hasPermissions = await checkPermissions();
+            if (!hasPermissions) {
+                document.getElementById("error-container").innerHTML = "Error: Camera permission denied. Please allow access.";
+                return;
+            }
 
-            async function init() {
-    const modelURL = URL + "model.json";
-    const metadataURL = URL + "metadata.json";
+            try {
+                model = await tmImage.load(modelURL, metadataURL);
+                maxPredictions = model.getTotalClasses();
 
-    try {
-        // Load the model and metadata
-        model = await tmImage.load(modelURL, metadataURL);
-        maxPredictions = model.getTotalClasses();
+                // Setup the webcam
+                const flip = false;
+                webcam = new tmImage.Webcam(640, 480, flip);
+                await webcam.setup({ facingMode: "environment" });
+                await webcam.play();
+                window.requestAnimationFrame(loop);
 
-        // Check for camera permissions before setup
-        const stream = await navigator.mediaDevices.getUserMedia({ video: true });
-        if (stream) {
-            const flip = false;
-            webcam = new tmImage.Webcam(640, 480, flip);
-            await webcam.setup({ facingMode: "environment" });
-            await webcam.play();
-            window.requestAnimationFrame(loop);
+                // Append webcam canvas
+                document.getElementById("webcam-container").appendChild(webcam.canvas);
 
-            // Append webcam canvas
-            document.getElementById("webcam-container").appendChild(webcam.canvas);
-            labelContainer = document.getElementById("label-container");
-            for (let i = 0; i < maxPredictions; i++) {
-                labelContainer.appendChild(document.createElement("div"));
+                labelContainer = document.getElementById("label-container");
+                for (let i = 0; i < maxPredictions; i++) {
+                    labelContainer.appendChild(document.createElement("div"));
+                }
+            } catch (err) {
+                document.getElementById("error-container").innerHTML = "Error: Could not access the camera. Please check your permissions and ensure the camera is not in use by another application.";
+                console.error("Error accessing the webcam: ", err);
             }
         }
-    } catch (err) {
-        document.getElementById("error-container").innerHTML = "Error: Could not access the camera. Please check your permissions and ensure the camera is not in use by another application.";
-        console.error("Error accessing the webcam: ", err);
-    }
-}
-
 
         async function loop() {
             webcam.update();
@@ -300,42 +256,31 @@
             }
         }
 
-       async function updateAuraPoints(points) {
-    auraPoints += points;
-    localStorage.setItem('auraPoints', auraPoints);
+        async function updateAuraPoints(points) {
+            auraPoints += points;
+            localStorage.setItem('auraPoints', auraPoints);
 
-    const data = {
-        auraPoints: auraPoints
-    };
+            const data = { auraPoints: auraPoints };
 
-    try {
-        const response = await fetch(`https://projectcleanup-74b3.restdb.io/rest/userdata/${currentUserId}`, {
-            method: 'PATCH',
-            headers: {
-                'Content-Type': 'application/json',
-                'x-apikey': '66f1a6d903bb68c0d791b216'
-            },
-            body: JSON.stringify(data)
-        });
+            try {
+                const response = await fetch(`https://projectcleanup-74b3.restdb.io/rest/userdata/${currentUserId}`, {
+                    method: 'PUT',
+                    headers: {
+                        'x-apikey': '66f1a6d903bb68c0d791b216',
+                        'Content-Type': 'application/json'
+                    },
+                    body: JSON.stringify(data)
+                });
 
-        if (response.ok) {
-            document.getElementById('user-details').textContent = `Welcome back, ${localStorage.getItem('name')}! Aura Points: ${auraPoints}`;
-            
-            // Show the congratulation message
-            alert('Congrats! You got 1 point.');
-
-            // Return to the welcome screen
-            document.getElementById('points-container').classList.add('hidden');
-            document.getElementById('welcome-container').classList.remove('hidden');
-        } else {
-            console.error('Error updating aura points:', response.statusText);
+                if (!response.ok) {
+                    throw new Error('Error updating aura points');
+                }
+            } catch (error) {
+                console.error('Error updating aura points:', error);
+            }
         }
-    } catch (error) {
-        console.error('Error:', error);
-    }
-}
-
     </script>
 </body>
 
 </html>
+
