@@ -266,7 +266,12 @@
         // Show alert message to the user
         alert('You have earned points!');
 
-        // Return to home screen
+        // Stop the webcam stream and clean up resources
+        if (webcam) {
+            webcam.stop();  // Stop the camera
+        }
+
+        // Hide the points screen and return to the home screen
         document.getElementById('points-container').classList.add('hidden');
         document.getElementById('welcome-container').classList.remove('hidden');
 
