@@ -185,37 +185,24 @@
             document.getElementById('points-container').classList.remove('hidden');
         }
 
-        // Check camera permissions before initializing the webcam
-        async function checkPermissions() {
-            try {
-                const permissions = await navigator.permissions.query({ name: 'camera' });
-                console.log('Camera permissions: ', permissions.state);
-                return permissions.state === 'granted';
-            } catch (err) {
-                console.error('Error checking camera permissions: ', err);
-                return false;
-            }
-        }
-
-        // Initialize the webcam and model
+        // Initialize the webcam and model with explicit permission request
         async function init() {
             const modelURL = URL + "model.json";
             const metadataURL = URL + "metadata.json";
 
-            const hasPermissions = await checkPermissions();
-            if (!hasPermissions) {
-                document.getElementById("error-container").innerHTML = "Error: Camera permission denied. Please allow access.";
-                return;
-            }
-
             try {
+                // Request camera access
+                const stream = await navigator.mediaDevices.getUserMedia({ video: true });
+                console.log("Camera access granted");
+
+                // Load the model
                 model = await tmImage.load(modelURL, metadataURL);
                 maxPredictions = model.getTotalClasses();
 
-                // Setup the webcam
+                // Setup the webcam using the granted stream
                 const flip = false;
                 webcam = new tmImage.Webcam(640, 480, flip);
-                await webcam.setup({ facingMode: "environment" });
+                await webcam.setup({ facingMode: "environment", video: stream });
                 await webcam.play();
                 window.requestAnimationFrame(loop);
 
@@ -227,8 +214,8 @@
                     labelContainer.appendChild(document.createElement("div"));
                 }
             } catch (err) {
-                document.getElementById("error-container").innerHTML = "Error: Could not access the camera. Please check your permissions and ensure the camera is not in use by another application.";
-                console.error("Error accessing the webcam: ", err);
+                console.error('Error accessing the webcam: ', err);
+                document.getElementById("error-container").innerHTML = "Error: Camera access denied or unavailable.";
             }
         }
 
@@ -283,4 +270,3 @@
 </body>
 
 </html>
-
